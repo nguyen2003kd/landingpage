@@ -65,25 +65,38 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 shadow">
+    <header className="flex items-center justify-between px-20 py-4 shadow">
       <LogoManager />
 
-      <nav className="hidden lg:flex md:text-sm items-center space-x-6 text-black/90 font-medium">
-        <a href="#">Đăng ký tham gia</a>
-        <a href="#">Khoảng khắc chương trình</a>
-        <a href="#">Nội dung chương trình</a>
-        <a href="#">Đội ngũ chuyên môn</a>
-        <a href="#">Nhà tài trợ</a>
+      <nav className="hidden lg:flex md:text-0.5xl items-center space-x-9 text-black/90 font-medium">
+        {[
+          "Đăng ký tham gia",
+          "Khoảng khắc chương trình",
+          "Nội dung chương trình",
+          "Đội ngũ chuyên môn",
+          "Nhà tài trợ",
+        ].map((label, idx) => (
+          <a
+            key={idx}
+            href="#"
+            className="relative transition-colors text-black/90 hover:text-blue-800
+    after:content-[''] after:absolute after:bottom-[-6px] after:left-1/2 
+    after:translate-x-[-50%] after:h-[3px] after:w-0 after:bg-blue-800 after:rounded 
+    after:transition-all after:duration-300 hover:after:w-full"
+          >
+            {label}
+          </a>
+        ))}
       </nav>
 
       <div className=" space-x-2 relative md:flex">
         <div className="hidden lg:flex items-center">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg">
+          <Button className="bg-blue-800 text-white hover:bg-white hover:text-blue-800 font-semibold px-6 py-5 rounded-full transition-all duration-200 transform  hover:shadow-lg border border-blue-600">
             QUYỀN LỢI NHÀ TÀI TRỢ
           </Button>
         </div>
 
-        {createdButtons.map((btn, idx) => (
+        {/* {createdButtons.map((btn, idx) => (
           <div key={idx} className="relative">
             <div onClick={() => handleEdit(idx)}>
               <CustomButton {...btn} />
@@ -96,7 +109,7 @@ export default function Header() {
               />
             )}
           </div>
-        ))}
+        ))} */}
 
         {showCreator && (
           <div className="absolute top-full right-0 mt-2 bg-white p-4 shadow-lg rounded z-50 w-72 space-y-2">
@@ -218,9 +231,9 @@ export default function Header() {
         </div>
       )}
       <div className="flex items-center space-x-2">
-        <Button variant="outline" onClick={() => setShowCreator(!showCreator)}>
+        {/* <Button variant="outline" onClick={() => setShowCreator(!showCreator)}>
           +
-        </Button>
+        </Button> */}
         <button
           onClick={() => setOpenMenu(!openMenu)}
           className="lg:hidden text-2xl focus:outline-none flex border border-gray-300 rounded p-2 hover:bg-gray-100 transition-colors"
