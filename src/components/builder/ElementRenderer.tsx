@@ -87,14 +87,14 @@ export default function ElementRenderer({
       style.backgroundImage = `url(${props.backgroundImage})`;
       style.backgroundSize = "cover";
       style.backgroundRepeat = "no-repeat";
-      
+
       // Vị trí ảnh nền
       if (props.backgroundPosition) {
         style.backgroundPosition = props.backgroundPosition;
       } else {
         style.backgroundPosition = "center";
       }
-      
+
       // Hiệu ứng di chuyển ảnh nền
       if (props.backgroundAnimation) {
         switch (props.backgroundAnimation) {
@@ -111,7 +111,7 @@ export default function ElementRenderer({
             break;
         }
       }
-      
+
       console.log("Applied background image:", props.backgroundImage);
       console.log("Background position:", props.backgroundPosition);
       console.log("Background animation:", props.backgroundAnimation);
@@ -487,14 +487,17 @@ export default function ElementRenderer({
             {renderVideoBackground(element.props)}
 
             {/* Background Image Overlay */}
-            {element.props.backgroundImage && element.props.backgroundOverlayOpacity && parseInt(element.props.backgroundOverlayOpacity) > 0 && (
-              <div 
-                className="absolute inset-0 bg-black z-10"
-                style={{
-                  opacity: parseInt(element.props.backgroundOverlayOpacity) / 100
-                }}
-              />
-            )}
+            {element.props.backgroundImage &&
+              element.props.backgroundOverlayOpacity &&
+              parseInt(element.props.backgroundOverlayOpacity) > 0 && (
+                <div
+                  className="absolute inset-0 bg-black z-10"
+                  style={{
+                    opacity:
+                      parseInt(element.props.backgroundOverlayOpacity) / 100,
+                  }}
+                />
+              )}
 
             {/* Drag Handle và Delete button cho Section */}
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 flex items-center gap-2">

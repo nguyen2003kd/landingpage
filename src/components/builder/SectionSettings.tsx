@@ -516,7 +516,9 @@ export default function SectionSettings({
                               ? "bg-blue-500 text-white border-blue-500"
                               : "bg-white text-gray-600 border-gray-300"
                           }`}
-                          onClick={() => onChange("backgroundPosition", position.value)}
+                          onClick={() =>
+                            onChange("backgroundPosition", position.value)
+                          }
                           title={position.value}
                         >
                           {position.label}
@@ -539,7 +541,9 @@ export default function SectionSettings({
                         max="100"
                         value={element.props.backgroundOverlayOpacity || "0"}
                         className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                        onChange={(e) => onChange("backgroundOverlayOpacity", e.target.value)}
+                        onChange={(e) =>
+                          onChange("backgroundOverlayOpacity", e.target.value)
+                        }
                       />
                       <div className="flex items-center gap-1">
                         <input
@@ -548,7 +552,9 @@ export default function SectionSettings({
                           max="100"
                           value={element.props.backgroundOverlayOpacity || "0"}
                           className="w-12 text-center text-sm border border-gray-300 rounded px-1 py-1"
-                          onChange={(e) => onChange("backgroundOverlayOpacity", e.target.value)}
+                          onChange={(e) =>
+                            onChange("backgroundOverlayOpacity", e.target.value)
+                          }
                         />
                         <span className="text-sm text-gray-500">%</span>
                       </div>
@@ -568,7 +574,9 @@ export default function SectionSettings({
                     <select
                       value={element.props.backgroundAnimation || "none"}
                       className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                      onChange={(e) => onChange("backgroundAnimation", e.target.value)}
+                      onChange={(e) =>
+                        onChange("backgroundAnimation", e.target.value)
+                      }
                     >
                       <option value="none">Không có hiệu ứng</option>
                       <option value="horizontal">Chạy theo chiều ngang</option>
