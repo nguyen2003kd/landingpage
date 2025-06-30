@@ -55,19 +55,154 @@ export default function ElementRenderer({
   // Xử lý phím Delete
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Delete' && selectedId) {
+      if (e.key === "Delete" && selectedId) {
         e.preventDefault();
         removeElement(selectedId);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedId, removeElement]);
 
   const handleDeleteElement = (elementId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     removeElement(elementId);
+  };
+
+  // Tạo style cho section từ props
+  const getSectionStyle = (props: any) => {
+    const style: React.CSSProperties = {};
+
+    console.log("Section props:", props);
+
+    // Màu nền
+    if (props.backgroundColor) {
+      style.backgroundColor = props.backgroundColor;
+      console.log("Applied background color:", props.backgroundColor);
+    }
+
+    // Ảnh nền
+    if (props.backgroundImage) {
+      style.backgroundImage = `url(${props.backgroundImage})`;
+      style.backgroundSize = "cover";
+      style.backgroundRepeat = "no-repeat";
+      
+      // Vị trí ảnh nền
+      if (props.backgroundPosition) {
+        style.backgroundPosition = props.backgroundPosition;
+      } else {
+        style.backgroundPosition = "center";
+      }
+      
+      // Hiệu ứng di chuyển ảnh nền
+      if (props.backgroundAnimation) {
+        switch (props.backgroundAnimation) {
+          case "horizontal":
+            style.backgroundSize = "200% 100%";
+            style.animation = "moveHorizontal 10s linear infinite";
+            break;
+          case "vertical":
+            style.backgroundSize = "100% 200%";
+            style.animation = "moveVertical 10s linear infinite";
+            break;
+          case "parallax":
+            style.backgroundAttachment = "fixed";
+            break;
+        }
+      }
+      
+      console.log("Applied background image:", props.backgroundImage);
+      console.log("Background position:", props.backgroundPosition);
+      console.log("Background animation:", props.backgroundAnimation);
+    }
+
+    // Bo góc
+    if (props.borderRadius) {
+      style.borderRadius = `${props.borderRadius}px`;
+    }
+
+    // Viền
+    if (props.borderStyle && props.borderColor) {
+      style.border = `2px ${props.borderStyle} ${props.borderColor}`;
+    }
+
+    // Đổ bóng
+    if (props.shadow === "true" || props.shadowEnabled === "true") {
+      style.boxShadow =
+        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+    }
+
+    // Độ trong suốt
+    if (props.opacity && props.opacity !== "100") {
+      style.opacity = parseInt(props.opacity) / 100;
+    }
+
+    // Margin
+    if (props.marginTop) style.marginTop = `${props.marginTop}px`;
+    if (props.marginBottom) style.marginBottom = `${props.marginBottom}px`;
+    if (props.marginLeft) style.marginLeft = `${props.marginLeft}px`;
+    if (props.marginRight) style.marginRight = `${props.marginRight}px`;
+
+    // Padding
+    if (props.paddingTop) style.paddingTop = `${props.paddingTop}px`;
+    if (props.paddingBottom) style.paddingBottom = `${props.paddingBottom}px`;
+    if (props.paddingLeft) style.paddingLeft = `${props.paddingLeft}px`;
+    if (props.paddingRight) style.paddingRight = `${props.paddingRight}px`;
+
+    console.log("Final style:", style);
+    return style;
+  };
+
+  // Render video background nếu có
+  const renderVideoBackground = (props: any) => {
+    if (!props.backgroundVideo) return null;
+
+    console.log("Rendering video background:", props.backgroundVideo);
+
+    // Xử lý YouTube URL
+    const getYouTubeEmbedUrl = (url: string) => {
+      const regex =
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+      const match = url.match(regex);
+      return match
+        ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playlist=${match[1]}`
+        : null;
+    };
+
+    const embedUrl = getYouTubeEmbedUrl(props.backgroundVideo);
+    console.log("Embed URL:", embedUrl);
+
+    if (!embedUrl) {
+      console.log("Invalid YouTube URL");
+      return null;
+    }
+
+    return (
+      <div
+        className="absolute inset-0 overflow-hidden rounded-xl"
+        style={{ zIndex: 0 }}
+      >
+        <iframe
+          src={embedUrl}
+          className="absolute top-1/2 left-1/2 w-full h-full transform -translate-x-1/2 -translate-y-1/2"
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          style={{
+            minWidth: "120%",
+            minHeight: "120%",
+            pointerEvents: "none",
+          }}
+        />
+        {/* Overlay cho video */}
+        {props.videoOpacity && parseInt(props.videoOpacity) > 0 && (
+          <div
+            className="absolute inset-0 bg-black"
+            style={{ opacity: parseInt(props.videoOpacity) / 100 }}
+          />
+        )}
+      </div>
+    );
   };
 
   const renderWrapper = (element: CanvasElement, children: React.ReactNode) => {
@@ -92,11 +227,15 @@ export default function ElementRenderer({
             onClick={(e) => handleDeleteElement(element.id, e)}
             title="Xóa element (Delete)"
           >
-            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            <svg
+              className="w-2.5 h-2.5"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
-          
+
           {/* Drag indicator */}
           <div className="bg-gray-800 text-white text-xs px-1 py-0.5 rounded flex items-center gap-1">
             <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 24 24">
@@ -137,23 +276,23 @@ export default function ElementRenderer({
       const getGridStyle = () => {
         const layout = element.props.layout || "default";
         const columnRatio = element.props.columnRatio;
-        
+
         if (layout === "default") return {};
-        
+
         if (layout === "1-1-1-1") {
           return {
-            gridTemplateColumns: "repeat(4, 1fr)"
+            gridTemplateColumns: "repeat(4, 1fr)",
           };
         }
-        
+
         // Xử lý 2 cột với tỷ lệ tùy chỉnh
         if (columnRatio && typeof columnRatio === "string") {
-          const [left, right] = columnRatio.split(":").map(v => parseInt(v));
+          const [left, right] = columnRatio.split(":").map((v) => parseInt(v));
           return {
-            gridTemplateColumns: `${left}% ${right}%`
+            gridTemplateColumns: `${left}% ${right}%`,
           };
         }
-        
+
         // Fallback mặc định
         switch (layout) {
           case "2-2":
@@ -190,40 +329,10 @@ export default function ElementRenderer({
                   index
                 )}`}
               >
-                {/* Column Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                    Cột {index + 1}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        columnChildren.length > 0
-                          ? "bg-green-400"
-                          : "bg-gray-300"
-                      }`}
-                    ></div>
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        columnChildren.length > 1
-                          ? "bg-green-400"
-                          : "bg-gray-300"
-                      }`}
-                    ></div>
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        columnChildren.length > 2
-                          ? "bg-green-400"
-                          : "bg-gray-300"
-                      }`}
-                    ></div>
-                  </div>
-                </div>
-
                 {/* Column Content - Droppable Zone */}
                 <DropZone
                   id={`${element.id}-column-${index}`}
-                  className={`flex-1 border-2 border-dashed rounded-lg p-3 min-h-[120px] transition-all duration-200 ${
+                  className={`flex-1 border-2 border-dashed rounded-lg p-3 min-h-[120px] transition-all duration-200 bg-transition ${
                     columnChildren.length > 0
                       ? "border-green-300 bg-gradient-to-br from-green-50/50 to-emerald-50/30 hover:from-green-50 hover:to-emerald-50"
                       : "border-blue-200 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 hover:from-blue-50 hover:to-indigo-50"
@@ -273,19 +382,6 @@ export default function ElementRenderer({
                     )}
                   </SortableContext>
                 </DropZone>
-
-                {/* Column Footer - Hiển thị số lượng elements */}
-                <div className="flex items-center justify-center mt-2">
-                  <div
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      columnChildren.length > 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {columnChildren.length} items
-                  </div>
-                </div>
               </div>
             );
           });
@@ -364,29 +460,60 @@ export default function ElementRenderer({
             }
           }}
           data-section-wrapper
+          style={getSectionStyle(element.props)}
         >
           <DropZone
             id={element.id}
-            className={`relative group p-4 border-2 border-dashed rounded-xl min-h-[120px] bg-gradient-to-br transition-all duration-300 shadow-sm hover:shadow-md cursor-move ${
+            className={`relative group p-4 border-2 border-dashed min-h-[120px] transition-all duration-300 shadow-sm hover:shadow-md cursor-move bg-transition ${
+              // Chỉ áp dụng màu nền mặc định nếu không có style custom
+              !element.props.backgroundColor ? "bg-gradient-to-br" : ""
+            } ${
               selectedId === element.id
-                ? "border-blue-500 from-blue-50 to-blue-100/50 shadow-lg"
-                : "border-gray-300 from-gray-50 to-gray-100/50 hover:from-gray-100 hover:to-gray-50"
+                ? "border-blue-500 shadow-lg"
+                : "border-gray-300 hover:border-gray-400"
+            } ${
+              // Chỉ áp dụng background gradient mặc định nếu không có background custom
+              !element.props.backgroundColor && !element.props.backgroundImage
+                ? selectedId === element.id
+                  ? "from-blue-50 to-blue-100/50"
+                  : "from-gray-50 to-gray-100/50 hover:from-gray-100 hover:to-gray-50"
+                : ""
+            } ${
+              // Chỉ áp dụng border radius mặc định nếu không có custom
+              !element.props.borderRadius ? "rounded-xl" : ""
             }`}
           >
+            {/* Video Background */}
+            {renderVideoBackground(element.props)}
+
+            {/* Background Image Overlay */}
+            {element.props.backgroundImage && element.props.backgroundOverlayOpacity && parseInt(element.props.backgroundOverlayOpacity) > 0 && (
+              <div 
+                className="absolute inset-0 bg-black z-10"
+                style={{
+                  opacity: parseInt(element.props.backgroundOverlayOpacity) / 100
+                }}
+              />
+            )}
+
             {/* Drag Handle và Delete button cho Section */}
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20 flex items-center gap-2">
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-30 flex items-center gap-2">
               {/* Delete button */}
               <button
                 className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded flex items-center gap-1 transition-colors duration-200"
                 onClick={(e) => handleDeleteElement(element.id, e)}
                 title="Xóa section (Delete)"
               >
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 <span>Xóa</span>
               </button>
-              
+
               {/* Drag Handle */}
               <div
                 className="flex items-center gap-1 bg-gray-800 text-white text-xs px-2 py-1 rounded pointer-events-auto"
@@ -406,30 +533,25 @@ export default function ElementRenderer({
               </div>
             </div>
 
-            {/* Selected indicator với hướng dẫn Delete */}
+            {/* Selected indicator */}
             {selectedId === element.id && (
-              <div className="absolute top-2 left-2 z-20">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                    <svg
-                      className="w-3 h-3"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Đã chọn</span>
-                  </div>
-                  <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded animate-pulse">
-                    Nhấn Delete để xóa
-                  </div>
+              <div className="absolute top-2 left-2 z-30">
+                <div className="flex items-center gap-1 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Đã chọn</span>
                 </div>
               </div>
             )}
 
             {/* Section Content */}
             <div
-              className={`${getLayoutClasses(layout)} gap-4 relative z-0`}
+              className={`${getLayoutClasses(layout)} gap-4 relative z-10`}
               style={getGridStyle()}
               data-section-content
             >

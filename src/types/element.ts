@@ -17,6 +17,10 @@ export interface ElementProps {
   backgroundImage?: string;
   backgroundVideo?: string;
   videoOpacity?: string;
+  // Advanced background properties
+  backgroundPosition?: string; // 9 vị trí lưới: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right
+  backgroundOverlayOpacity?: string; // độ mờ lớp phủ ảnh nền
+  backgroundAnimation?: string; // hiệu ứng di chuyển: none, horizontal, vertical, parallax
   // Border and styling
   borderRadius?: string;
   borderStyle?: string;
