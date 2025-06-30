@@ -12,7 +12,7 @@ import {
   MousePointer,
 } from "lucide-react";
 import { useBuilderStore } from "@/store/useBuilderStore";
-import { CanvasElement, SectionLayout } from "@/types/element";
+import { CanvasElement, SectionLayout, TextProps, ButtonProps, ImageProps, CardProps, SectionProps } from "@/types/element";
 
 // Helper function to find an element in a tree structure
 const findElementInTree = (
@@ -35,19 +35,19 @@ interface RightPanelProps {
 }
 
 const RightPanel = ({ setSelectpanel }: RightPanelProps) => {
-  const { elements, selectedId, updateElement, removeElement, selectElement } =
+  const { elements, selectedElementId, updateElement, removeElement, selectElement } =
     useBuilderStore();
-  const selectedElement = findElementInTree(elements, selectedId);
+  const selectedElement = findElementInTree(elements, selectedElementId);
 
   const handleUpdate = (key: string, value: string) => {
-    if (selectedId) {
-      updateElement(selectedId, { [key]: value });
+    if (selectedElementId) {
+      updateElement(selectedElementId, { [key]: value });
     }
   };
 
   const handleDelete = () => {
-    if (selectedId) {
-      removeElement(selectedId);
+    if (selectedElementId) {
+      removeElement(selectedElementId);
       selectElement(null); // Deselect after deleting
     }
   };
@@ -143,6 +143,7 @@ function TextSettings({
   element: CanvasElement;
   onChange: (k: string, v: string) => void;
 }) {
+  const props = element.props as TextProps;
   return (
     <div className="space-y-4">
       <div>
@@ -153,7 +154,7 @@ function TextSettings({
         <textarea
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
           rows={5}
-          value={element.props.text || ""}
+          value={props.text || ""}
           onChange={(e) => onChange("text", e.target.value)}
         />
       </div>
@@ -168,6 +169,7 @@ function ButtonSettings({
   element: CanvasElement;
   onChange: (k: string, v: string) => void;
 }) {
+  const props = element.props as ButtonProps;
   return (
     <div className="space-y-4">
       <div>
@@ -178,7 +180,7 @@ function ButtonSettings({
         <input
           type="text"
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={element.props.text || ""}
+          value={props.text || ""}
           onChange={(e) => onChange("text", e.target.value)}
         />
       </div>
@@ -190,7 +192,7 @@ function ButtonSettings({
         <input
           type="url"
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={element.props.link || ""}
+          value={props.link || ""}
           onChange={(e) => onChange("link", e.target.value)}
         />
       </div>
@@ -205,6 +207,7 @@ function ImageSettings({
   element: CanvasElement;
   onChange: (k: string, v: string) => void;
 }) {
+  const props = element.props as ImageProps;
   return (
     <div className="space-y-4">
       <div>
@@ -215,7 +218,7 @@ function ImageSettings({
         <input
           type="url"
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={element.props.url || ""}
+          value={props.url || ""}
           onChange={(e) => onChange("url", e.target.value)}
         />
       </div>
@@ -230,6 +233,7 @@ function CardSettings({
   element: CanvasElement;
   onChange: (k: string, v: string) => void;
 }) {
+  const props = element.props as CardProps;
   return (
     <div className="space-y-4">
       <div>
@@ -240,7 +244,7 @@ function CardSettings({
         <input
           type="text"
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={element.props.title || ""}
+          value={props.title || ""}
           onChange={(e) => onChange("title", e.target.value)}
         />
       </div>
@@ -252,7 +256,7 @@ function CardSettings({
         <textarea
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
           rows={3}
-          value={element.props.description || ""}
+          value={props.description || ""}
           onChange={(e) => onChange("description", e.target.value)}
         />
       </div>
@@ -267,6 +271,7 @@ function SectionSettings({
   element: CanvasElement;
   onChange: (k: string, v: string) => void;
 }) {
+  const props = element.props as SectionProps;
   const layouts: { value: SectionLayout; label: string }[] = [
     { value: "default", label: "Mặc định (dọc)" },
     { value: "2-2", label: "2 cột bằng nhau" },
@@ -284,7 +289,7 @@ function SectionSettings({
         </label>
         <select
           className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={element.props.layout || "default"}
+          value={props.layout || "default"}
           onChange={(e) => onChange("layout", e.target.value)}
         >
           {layouts.map((layout) => (

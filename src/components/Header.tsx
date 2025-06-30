@@ -1,20 +1,17 @@
 import React from 'react';
-import { Globe, Smartphone, Download, Undo2, Redo2, Trash2, Save } from 'lucide-react';
-import { useBuilderStore } from '@/store/useBuilderStore';
-import { CanvasElement } from '@/types/element';
+import { useElementStore } from '@/src/store/elementStore';
+import { Download, Trash2, Save } from 'lucide-react';
 
-const Header = () => {
-  const { elements, selectedElementId, getLayoutJSON, loadLayoutFromJSON, getSelectedElement } = useBuilderStore();
-  
-  const selectedElement = getSelectedElement();
-  
+const Header: React.FC = () => {
+  const { elements, getLayoutJSON, loadLayoutFromJSON } = useElementStore();
+
   const handleExportJSON = () => {
     const json = getLayoutJSON();
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `layout-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = 'layout.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -40,56 +37,17 @@ const Header = () => {
     }
   };
 
-  // Helper function to count total elements (including nested ones)
-  const countElements = (elements: CanvasElement[]): number => {
-    let count = elements.length;
-    elements.forEach(element => {
-      if (element.children && element.children.length > 0) {
-        count += countElements(element.children);
-      }
-    });
-    return count;
-  };
-
-  const totalElements = countElements(elements);
-
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-gray-800">VietProDev</h1>
-          <div className="flex items-center gap-2">
-            <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
-              <Undo2 className="w-4 h-4" />
-            </button>
-            <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
-              <Redo2 className="w-4 h-4" />
-            </button>
-          </div>
+          <h1 className="text-xl font-bold text-gray-800">Landing Page Builder</h1>
           <span className="text-sm text-gray-500">
-            {totalElements} element{totalElements !== 1 ? 's' : ''}
-            {selectedElementId && (
-              <span className="ml-2 text-blue-600">
-                • Selected: {selectedElement?.type || 'Unknown'} (ID: {selectedElementId.slice(0, 8)}...)
-              </span>
-            )}
+            {elements.length} element{elements.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
-            <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200">
-              <Globe className="w-4 h-4 inline mr-1" />
-              Desktop
-            </button>
-            <button className="px-3 py-1 text-sm text-gray-600 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200">
-              <Smartphone className="w-4 h-4 inline mr-1" />
-              Mobile
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-             <div className="flex items-center gap-3">
           {/* Import JSON */}
           <label className="px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center gap-2 cursor-pointer">
             <Save className="w-4 h-4" />
@@ -120,11 +78,9 @@ const Header = () => {
             Clear All
           </button>
         </div>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
 
-export default Header;
+export default Header; 

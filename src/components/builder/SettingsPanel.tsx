@@ -1,12 +1,12 @@
 "use client";
 
 import { useBuilderStore } from "../../store/useBuilderStore";
-import { CanvasElement } from "../../types/element";
+import { CanvasElement, TextProps, ButtonProps, ImageProps, CardProps } from "../../types/element";
 import { Settings, Type, Link, Image, FileText, Minus } from "lucide-react";
 
 export default function SettingsPanel() {
-  const { elements, selectedId, updateElement } = useBuilderStore();
-  const element = elements.find((el) => el.id === selectedId);
+  const { updateElement, getSelectedElement } = useBuilderStore();
+  const element = getSelectedElement();
 
   if (!element) {
     return (
@@ -75,6 +75,7 @@ function TextSettings({
   element: CanvasElement; 
   onChange: (key: string, value: string) => void;
 }) {
+  const props = element.props as TextProps;
   return (
     <div className="space-y-4">
       <div>
@@ -85,7 +86,7 @@ function TextSettings({
         <textarea
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           rows={4}
-          value={element.props.text || ""}
+          value={props.text || ""}
           onChange={(e) => onChange("text", e.target.value)}
           placeholder="Nhập nội dung văn bản..."
         />
@@ -101,6 +102,7 @@ function ButtonSettings({
   element: CanvasElement; 
   onChange: (key: string, value: string) => void;
 }) {
+  const props = element.props as ButtonProps;
   return (
     <div className="space-y-4">
       <div>
@@ -111,7 +113,7 @@ function ButtonSettings({
         <input
           type="text"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={element.props.text || ""}
+          value={props.text || ""}
           onChange={(e) => onChange("text", e.target.value)}
           placeholder="Nhập nội dung button..."
         />
@@ -125,7 +127,7 @@ function ButtonSettings({
         <input
           type="url"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={element.props.link || ""}
+          value={props.link || ""}
           onChange={(e) => onChange("link", e.target.value)}
           placeholder="https://example.com"
         />
@@ -141,6 +143,7 @@ function ImageSettings({
   element: CanvasElement; 
   onChange: (key: string, value: string) => void;
 }) {
+  const props = element.props as ImageProps;
   return (
     <div className="space-y-4">
       <div>
@@ -151,7 +154,7 @@ function ImageSettings({
         <input
           type="url"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={element.props.url || ""}
+          value={props.url || ""}
           onChange={(e) => onChange("url", e.target.value)}
           placeholder="https://example.com/image.jpg"
         />
@@ -165,7 +168,7 @@ function ImageSettings({
         <input
           type="text"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={element.props.title || ""}
+          value={props.title || ""}
           onChange={(e) => onChange("title", e.target.value)}
           placeholder="Mô tả ảnh..."
         />
@@ -181,6 +184,7 @@ function CardSettings({
   element: CanvasElement; 
   onChange: (key: string, value: string) => void;
 }) {
+  const props = element.props as CardProps;
   return (
     <div className="space-y-4">
       <div>
@@ -191,7 +195,7 @@ function CardSettings({
         <input
           type="text"
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={element.props.title || ""}
+          value={props.title || ""}
           onChange={(e) => onChange("title", e.target.value)}
           placeholder="Nhập tiêu đề card..."
         />
@@ -200,28 +204,14 @@ function CardSettings({
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
           <FileText className="w-4 h-4" />
-          Mô tả
+          Mô tả card
         </label>
         <textarea
           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           rows={3}
-          value={element.props.description || ""}
+          value={props.description || ""}
           onChange={(e) => onChange("description", e.target.value)}
           placeholder="Nhập mô tả card..."
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-          <Link className="w-4 h-4" />
-          Link &quot;Xem thêm&quot;
-        </label>
-        <input
-          type="url"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={element.props.link || ""}
-          onChange={(e) => onChange("link", e.target.value)}
-          placeholder="https://example.com"
         />
       </div>
     </div>

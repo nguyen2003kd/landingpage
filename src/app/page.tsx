@@ -33,7 +33,7 @@ function App() {
     })
   );
 
-  const { addElement } = useBuilderStore();
+  const { addElement, selectElement } = useBuilderStore();
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -78,6 +78,11 @@ function App() {
     // Logic sắp xếp (sẽ hoàn thiện sau)
   };
 
+  const handleCanvasClick = () => {
+    // Clear selection when clicking on empty canvas
+    selectElement(null);
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -96,7 +101,8 @@ function App() {
           <LeftSidebar />
 
           {/* Main Content */}
-          <MainContent />
+          <MainContent onCanvasClick={handleCanvasClick} />
+
           <DragOverlay>
             {activeId ? (
               <div className="bg-white border border-blue-300 rounded-lg p-3 shadow-lg opacity-80 cursor-grabbing">
@@ -107,6 +113,7 @@ function App() {
             ) : null}
           </DragOverlay>
         </DndContext>
+        
         {/* Right Panel */}
         {selectdpanel ? (
           <RightPanel setSelectpanel={setSelectpanel} />

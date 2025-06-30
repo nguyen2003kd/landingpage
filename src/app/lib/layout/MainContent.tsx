@@ -9,11 +9,15 @@ import ElementRenderer from "@/components/builder/ElementRenderer";
 import SortableItem from "@/components/builder/SortableItem";
 import { useDroppable } from '@dnd-kit/core';
 
-const MainContent = () => {
+interface MainContentProps {
+  onCanvasClick?: () => void;
+}
+
+const MainContent = ({ onCanvasClick }: MainContentProps) => {
   const { 
     elements, 
     selectElement, 
-    selectedId 
+    selectedElementId 
   } = useBuilderStore();
 
   const { setNodeRef } = useDroppable({
@@ -30,7 +34,11 @@ const MainContent = () => {
         items={elements.map((el) => el.id)} 
         strategy={verticalListSortingStrategy}
       >
-        <div ref={setNodeRef} className="mx-auto bg-white rounded-lg shadow-sm min-h-[600px] p-8 space-y-4">
+        <div 
+          ref={setNodeRef} 
+          className="mx-auto bg-white rounded-lg shadow-sm min-h-[600px] p-8 space-y-4"
+          onClick={onCanvasClick}
+        >
           {elements.length === 0 && (
             <div className="text-center py-20 pointer-events-none">
               <div className="text-gray-400 text-6xl mb-4">📝</div>
@@ -55,7 +63,7 @@ const MainContent = () => {
               <div
                 className={`
                   relative group border-2 rounded-lg p-4 transition-all duration-200
-                  ${selectedId === element.id 
+                  ${selectedElementId === element.id 
                     ? 'border-blue-400 bg-blue-50' 
                     : 'border-transparent hover:border-gray-300'
                   }
@@ -65,7 +73,7 @@ const MainContent = () => {
                   selectElement(element.id);
                 }}
               >
-                <ElementRenderer element={element} />
+                <ElementRenderer element={element} noWrapper={true} />
                 <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 bg-gray-800 text-white text-xs px-2 py-1 rounded">
                   {element.type}
                 </div>
@@ -74,17 +82,6 @@ const MainContent = () => {
           ))}
         </div>
       </SortableContext>
-      
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle, #6B7280 1px, transparent 1px)',
-            backgroundSize: '20px 20px',
-          }}
-        ></div>
-      </div>
     </div>
   );
 };

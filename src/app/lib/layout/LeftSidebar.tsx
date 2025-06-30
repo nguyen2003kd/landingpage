@@ -6,7 +6,8 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
-import Sidebar from "./_components/Sidebar";
+import Sidebar from "./_components/section";
+import Element from "@/src/app/lib/layout/_components/element"
 const LeftSidebar = () => {
   const tools = [
     { icon: FolderClosed, label: "bố cục và khối dựng sẵn", active: true },
@@ -21,7 +22,8 @@ const LeftSidebar = () => {
         return <Sidebar />;
         break;
       case 1:
-        setSelcted(1);
+        return <Element/>
+        break;
     }
   };
   return (

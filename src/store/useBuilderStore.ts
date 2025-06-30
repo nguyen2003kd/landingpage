@@ -43,24 +43,38 @@ const addElementToTree = (
   });
 };
 
-// ... (Các helper khác như findElement, moveElementInTree có thể được thêm vào sau)
+// Tìm element trong cây theo ID
+const findElementInTree = (elements: CanvasElement[], id: string): CanvasElement | null => {
+  for (const element of elements) {
+    if (element.id === id) {
+      return element;
+    }
+    if (element.children) {
+      const found = findElementInTree(element.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 interface BuilderState {
   elements: CanvasElement[];
-  selectedId: string | null;
+  selectedElementId: string | null;
   addElement: (newElement: Omit<CanvasElement, 'id' | 'children'>, parentId: string | null, index: number) => void;
   moveElement: (from: number, to: number) => void;
   removeElement: (id: string) => void;
   updateElement: (id: string, props: Partial<CanvasElement["props"]>) => void;
   selectElement: (id: string | null) => void;
   setElements: (els: CanvasElement[]) => void;
-  exportLayout: () => string;
-  importLayout: (json: string) => void;
+  getSelectedElement: () => CanvasElement | null;
+  getLayoutJSON: () => string;
+  loadLayoutFromJSON: (json: string) => void;
+  clearSelection: () => void;
 }
 
 export const useBuilderStore = create<BuilderState>((set, get) => ({
   elements: [],
-  selectedId: null,
+  selectedElementId: null,
   
   addElement: (elementData, parentId, index) =>
     set((state) => {
@@ -70,7 +84,8 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
         children: elementData.type === 'section' ? [] : undefined,
       };
       return {
-        elements: addElementToTree(state.elements, newElement, parentId, index)
+        elements: addElementToTree(state.elements, newElement, parentId, index),
+        selectedElementId: newElement.id, // Tự động chọn element mới được thêm
       };
     }),
     
@@ -85,7 +100,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   removeElement: (id) =>
     set((state) => ({
       elements: removeElementFromTree(state.elements, id),
-      selectedId: state.selectedId === id ? null : state.selectedId,
+      selectedElementId: state.selectedElementId === id ? null : state.selectedElementId,
     })),
     
   updateElement: (id, props) =>
@@ -104,21 +119,47 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       return { elements: updater(state.elements) };
     }),
     
-  selectElement: (id) => set({ selectedId: id }),
+  selectElement: (id) => set({ selectedElementId: id }),
   
   setElements: (els) => set({ elements: els }),
   
-  exportLayout: () => {
-    const { elements } = get();
-    return JSON.stringify(elements, null, 2);
+  getSelectedElement: () => {
+    const { elements, selectedElementId } = get();
+    if (!selectedElementId) return null;
+    return findElementInTree(elements, selectedElementId);
   },
   
-  importLayout: (json) => {
+  clearSelection: () => set({ selectedElementId: null }),
+  
+  getLayoutJSON: () => {
+    const { elements, selectedElementId } = get();
+    const layoutData = {
+      elements,
+      selectedElementId,
+      timestamp: new Date().toISOString(),
+      version: '1.0'
+    };
+    return JSON.stringify(layoutData, null, 2);
+  },
+
+  loadLayoutFromJSON: (json) => {
     try {
-      const elements = JSON.parse(json);
-      set({ elements });
+      const layoutData = JSON.parse(json);
+      
+      // Hỗ trợ cả format cũ (chỉ có elements) và format mới (có selectedElementId)
+      if (Array.isArray(layoutData)) {
+        // Format cũ - chỉ có mảng elements
+        set({ elements: layoutData, selectedElementId: null });
+      } else {
+        // Format mới - có cả elements và selectedElementId
+        const { elements, selectedElementId } = layoutData;
+        set({ 
+          elements: elements || [], 
+          selectedElementId: selectedElementId || null 
+        });
+      }
     } catch (error) {
-      console.error("Invalid JSON format:", error);
+      console.error('Failed to load layout from JSON:', error);
     }
   },
 })); 

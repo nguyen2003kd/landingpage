@@ -3,11 +3,6 @@
 import { useState } from "react";
 import { ElementType, SectionLayout } from "@/src/types/element";
 import {
-  FileText,
-  MousePointer,
-  Image,
-  CreditCard,
-  Minus,
   SquareStack,
   Grid2X2,
   Grid3X3,
@@ -16,7 +11,6 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { useBuilderStore } from "@/src/store/useBuilderStore";
 import { useDraggable } from "@dnd-kit/core";
 
 const COMPONENTS: {
@@ -55,15 +49,6 @@ const COMPONENTS: {
     icon: <Columns2 className="w-4 h-4" />,
     layout: "1-3",
   },
-  { type: "text", label: "Text", icon: <FileText className="w-4 h-4" /> },
-  {
-    type: "button",
-    label: "Button",
-    icon: <MousePointer className="w-4 h-4" />,
-  },
-  { type: "image", label: "Image", icon: <Image className="w-4 h-4" /> },
-  { type: "card", label: "Card", icon: <CreditCard className="w-4 h-4" /> },
-  { type: "divider", label: "Divider", icon: <Minus className="w-4 h-4" /> },
 ];
 
 export default function Sidebar() {
@@ -129,9 +114,6 @@ export default function Sidebar() {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <ExportButton />
-      </div>
     </aside>
   );
 }
@@ -167,21 +149,3 @@ function SidebarItem({
   );
 }
 
-function ExportButton() {
-  const { exportLayout } = useBuilderStore();
-
-  const handleExport = () => {
-    const json = exportLayout();
-    navigator.clipboard.writeText(json);
-    alert("Đã copy JSON layout vào clipboard!");
-  };
-
-  return (
-    <button
-      onClick={handleExport}
-      className="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 font-medium"
-    >
-      Xuất JSON Layout
-    </button>
-  );
-}
