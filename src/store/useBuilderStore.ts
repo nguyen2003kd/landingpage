@@ -16,6 +16,42 @@ const removeElementFromTree = (elements: CanvasElement[], id: string): CanvasEle
   }, [] as CanvasElement[]);
 };
 
+// Tìm element trong cây
+const findElementInTree = (elements: CanvasElement[], id: string): CanvasElement | null => {
+  for (const el of elements) {
+    if (el.id === id) return el;
+    if (el.children) {
+      const found = findElementInTree(el.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+// Di chuyển element từ vị trí này sang vị trí khác
+const moveElementInTree = (
+  elements: CanvasElement[],
+  sourceId: string,
+  targetParentId: string | null,
+  targetIndex: number,
+  columnIndex?: number
+): CanvasElement[] => {
+  // 1. Tìm element cần di chuyển
+  const elementToMove = findElementInTree(elements, sourceId);
+  if (!elementToMove) return elements;
+
+  // 2. Tạo bản sao với columnIndex mới nếu cần
+  const movedElement = columnIndex !== undefined 
+    ? { ...elementToMove, props: { ...elementToMove.props, columnIndex } }
+    : elementToMove;
+
+  // 3. Xóa element khỏi vị trí cũ
+  const elementsWithoutSource = removeElementFromTree(elements, sourceId);
+
+  // 4. Thêm element vào vị trí mới
+  return addElementToTree(elementsWithoutSource, movedElement, targetParentId, targetIndex);
+};
+
 // Tìm và chèn một element mới vào cây
 const addElementToTree = (
   elements: CanvasElement[], 
@@ -43,13 +79,62 @@ const addElementToTree = (
   });
 };
 
-// ... (Các helper khác như findElement, moveElementInTree có thể được thêm vào sau)
+// Sắp xếp lại elements trong cùng container
+const reorderElementsInContainer = (
+  elements: CanvasElement[],
+  containerId: string | null,
+  sourceIndex: number,
+  targetIndex: number
+): CanvasElement[] => {
+  if (!containerId) {
+    // Sắp xếp lại ở root level
+    const newElements = [...elements];
+    const [movedElement] = newElements.splice(sourceIndex, 1);
+    newElements.splice(targetIndex, 0, movedElement);
+    return newElements;
+  }
+
+  // Sắp xếp lại trong container con
+  return elements.map(el => {
+    if (el.id === containerId && el.children) {
+      const newChildren = [...el.children];
+      const [movedElement] = newChildren.splice(sourceIndex, 1);
+      newChildren.splice(targetIndex, 0, movedElement);
+      return { ...el, children: newChildren };
+    }
+    if (el.children) {
+      return { ...el, children: reorderElementsInContainer(el.children, containerId, sourceIndex, targetIndex) };
+    }
+    return el;
+  });
+};
+
+// Tìm index của element trong container
+const findElementIndex = (elements: CanvasElement[], elementId: string, containerId: string | null): number => {
+  if (!containerId) {
+    return elements.findIndex(el => el.id === elementId);
+  }
+  
+  for (const el of elements) {
+    if (el.id === containerId && el.children) {
+      return el.children.findIndex(child => child.id === elementId);
+    }
+    if (el.children) {
+      const index = findElementIndex(el.children, elementId, containerId);
+      if (index !== -1) return index;
+    }
+  }
+  return -1;
+};
 
 interface BuilderState {
   elements: CanvasElement[];
   selectedId: string | null;
   addElement: (newElement: Omit<CanvasElement, 'id' | 'children'>, parentId: string | null, index: number) => void;
+  addElementToColumn: (elementData: Omit<CanvasElement, 'id' | 'children'>, parentId: string, columnIndex: number) => void;
   moveElement: (from: number, to: number) => void;
+  moveElementToContainer: (sourceId: string, targetParentId: string | null, targetIndex: number, columnIndex?: number) => void;
+  reorderElements: (sourceId: string, targetId: string, containerId: string | null) => void;
   removeElement: (id: string) => void;
   updateElement: (id: string, props: Partial<CanvasElement["props"]>) => void;
   selectElement: (id: string | null) => void;
@@ -73,6 +158,34 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
         elements: addElementToTree(state.elements, newElement, parentId, index)
       };
     }),
+
+  addElementToColumn: (elementData, parentId, columnIndex) =>
+    set((state) => {
+      const newElement: CanvasElement = {
+        ...elementData,
+        id: nanoid(),
+        props: { ...elementData.props, columnIndex },
+        children: elementData.type === 'section' ? [] : undefined,
+      };
+      
+      // Thêm vào cuối children của parent section
+      const updater = (els: CanvasElement[]): CanvasElement[] => {
+        return els.map(el => {
+          if (el.id === parentId) {
+            return { 
+              ...el, 
+              children: [...(el.children || []), newElement] 
+            };
+          }
+          if (el.children) {
+            return { ...el, children: updater(el.children) };
+          }
+          return el;
+        });
+      };
+      
+      return { elements: updater(state.elements) };
+    }),
     
   moveElement: (from, to) =>
     set((state) => {
@@ -80,6 +193,23 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       const [moved] = elements.splice(from, 1);
       elements.splice(to, 0, moved);
       return { elements };
+    }),
+    
+  moveElementToContainer: (sourceId, targetParentId, targetIndex, columnIndex) =>
+    set((state) => ({
+      elements: moveElementInTree(state.elements, sourceId, targetParentId, targetIndex, columnIndex)
+    })),
+    
+  reorderElements: (sourceId, targetId, containerId) =>
+    set((state) => {
+      const sourceIndex = findElementIndex(state.elements, sourceId, containerId);
+      const targetIndex = findElementIndex(state.elements, targetId, containerId);
+      
+      if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return state;
+      
+      return {
+        elements: reorderElementsInContainer(state.elements, containerId, sourceIndex, targetIndex)
+      };
     }),
     
   removeElement: (id) =>
@@ -121,4 +251,4 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       console.error("Invalid JSON format:", error);
     }
   },
-})); 
+}));

@@ -78,7 +78,7 @@ function TextSettings({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 items-center gap-2">
           <Type className="w-4 h-4" />
           Nội dung văn bản
         </label>
@@ -104,7 +104,7 @@ function ButtonSettings({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 items-center gap-2">
           <Type className="w-4 h-4" />
           Nội dung button
         </label>
@@ -118,7 +118,7 @@ function ButtonSettings({
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2  items-center gap-2">
           <Link className="w-4 h-4" />
           Link URL
         </label>
@@ -144,7 +144,7 @@ function ImageSettings({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2  items-center gap-2">
           <Image className="w-4 h-4" />
           URL ảnh
         </label>
@@ -158,7 +158,7 @@ function ImageSettings({
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 items-center gap-2">
           <FileText className="w-4 h-4" />
           Tiêu đề ảnh
         </label>
@@ -184,7 +184,7 @@ function CardSettings({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2  items-center gap-2">
           <Type className="w-4 h-4" />
           Tiêu đề card
         </label>
@@ -198,7 +198,7 @@ function CardSettings({
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2  items-center gap-2">
           <FileText className="w-4 h-4" />
           Mô tả
         </label>
@@ -212,7 +212,7 @@ function CardSettings({
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2 items-center gap-2">
           <Link className="w-4 h-4" />
           Link &quot;Xem thêm&quot;
         </label>

@@ -12,7 +12,8 @@ import {
   MousePointer,
 } from "lucide-react";
 import { useBuilderStore } from "@/store/useBuilderStore";
-import { CanvasElement, SectionLayout } from "@/types/element";
+import { CanvasElement } from "@/types/element";
+import SectionSettings from "@/components/builder/SectionSettings";
 
 // Helper function to find an element in a tree structure
 const findElementInTree = (
@@ -87,7 +88,6 @@ const RightPanel = ({ setSelectpanel }: RightPanelProps) => {
                 {selectedElement.type}
               </span>
             </div>
-
             {/* Render Settings Form based on type */}
             {selectedElement.type === "text" && (
               <TextSettings element={selectedElement} onChange={handleUpdate} />
@@ -106,11 +106,11 @@ const RightPanel = ({ setSelectpanel }: RightPanelProps) => {
             )}
             {selectedElement.type === "card" && (
               <CardSettings element={selectedElement} onChange={handleUpdate} />
-            )}
+            )}{" "}
             {selectedElement.type === "section" && (
-              <SectionSettings 
-                element={selectedElement} 
-                onChange={handleUpdate} 
+              <SectionSettings
+                element={selectedElement}
+                onChange={handleUpdate}
               />
             )}
           </div>
@@ -255,47 +255,6 @@ function CardSettings({
           value={element.props.description || ""}
           onChange={(e) => onChange("description", e.target.value)}
         />
-      </div>
-    </div>
-  );
-}
-
-function SectionSettings({
-  element,
-  onChange,
-}: {
-  element: CanvasElement;
-  onChange: (k: string, v: string) => void;
-}) {
-  const layouts: { value: SectionLayout; label: string }[] = [
-    { value: "default", label: "Mặc định (dọc)" },
-    { value: "2-2", label: "2 cột bằng nhau" },
-    { value: "1-1-1-1", label: "4 cột bằng nhau" },
-    { value: "3-1", label: "Cột trái lớn" },
-    { value: "1-3", label: "Cột phải lớn" },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-          <Settings className="w-4 h-4" />
-          Layout Section
-        </label>
-        <select
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          value={element.props.layout || "default"}
-          onChange={(e) => onChange("layout", e.target.value)}
-        >
-          {layouts.map((layout) => (
-            <option key={layout.value} value={layout.value}>
-              {layout.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded">
-        💡 Tip: Thay đổi layout sẽ ảnh hưởng đến cách sắp xếp các component con bên trong section này.
       </div>
     </div>
   );

@@ -22,6 +22,14 @@ import { ElementType } from "@/types/element";
 function App() {
   const [selectdpanel, setSelectpanel] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const { selectedId } = useBuilderStore();
+
+  // Tự động mở RightPanel khi có element được chọn
+  React.useEffect(() => {
+    if (selectedId && !selectdpanel) {
+      setSelectpanel(true);
+    }
+  }, [selectedId, selectdpanel]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -33,7 +41,12 @@ function App() {
     })
   );
 
-  const { addElement } = useBuilderStore();
+  const {
+    addElement,
+    addElementToColumn,
+    moveElementToContainer,
+    reorderElements,
+  } = useBuilderStore();
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -63,6 +76,19 @@ function App() {
       const type = active.data.current.type as ElementType;
       const layout = active.data.current.layout;
 
+      // Kiểm tra nếu drop vào column cụ thể
+      const overIdStr = over.id as string;
+      if (overIdStr.includes("-column-")) {
+        // Parse để lấy parentId và columnIndex
+        const parts = overIdStr.split("-column-");
+        const parentId = parts[0];
+        const columnIndex = parseInt(parts[1]);
+
+        const props = type === "section" && layout ? { layout } : {};
+        addElementToColumn({ type, props }, parentId, columnIndex);
+        return;
+      }
+
       if (type !== "section" && targetParentId === null) {
         alert(
           "Bạn chỉ có thể thêm các component khác vào bên trong một Section."
@@ -75,7 +101,36 @@ function App() {
       return;
     }
 
-    // Logic sắp xếp (sẽ hoàn thiện sau)
+    // Logic sắp xếp và di chuyển element
+    // Kéo element hiện có từ vị trí này sang vị trí khác
+    const activeId = active.id as string;
+
+    // Kiểm tra nếu drop vào column cụ thể
+    const overIdStr = over.id as string;
+    if (overIdStr.includes("-column-")) {
+      // Parse để lấy parentId và columnIndex
+      const parts = overIdStr.split("-column-");
+      const parentId = parts[0];
+      const columnIndex = parseInt(parts[1]);
+
+      // Di chuyển element vào column cụ thể
+      moveElementToContainer(activeId, parentId, 999, columnIndex);
+      return;
+    }
+
+    // Kiểm tra nếu đang kéo element trong cùng container (sắp xếp lại)
+    const sourceParentId = active.data.current?.parentId ?? null;
+    const overParentId = over.data.current?.parentId ?? null;
+
+    if (sourceParentId === overParentId && !overIsContainer) {
+      // Sắp xếp lại trong cùng container
+      const targetId = over.id as string;
+      reorderElements(activeId, targetId, sourceParentId);
+      return;
+    }
+
+    // Di chuyển element vào container khác (section hoặc root)
+    moveElementToContainer(activeId, targetParentId, 999);
   };
 
   return (
@@ -101,7 +156,9 @@ function App() {
             {activeId ? (
               <div className="bg-white border border-blue-300 rounded-lg p-3 shadow-lg opacity-80 cursor-grabbing">
                 <p className="text-sm font-medium text-gray-700">
-                  Đang kéo: {`${activeId}`.replace("sidebar-", "")}
+                  {activeId.includes("sidebar-")
+                    ? `Đang kéo: ${activeId.replace("sidebar-", "")}`
+                    : `Di chuyển element`}
                 </p>
               </div>
             ) : null}
