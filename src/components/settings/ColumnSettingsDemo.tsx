@@ -7,11 +7,13 @@ import { SectionLayout } from "@/types/element";
 
 // Demo component để test ColumnSettings
 export default function ColumnSettingsDemo() {
-  const { selectColumn, updateColumnSettings, getColumnSettings, elements, setElements } = useBuilderStore();
-  
-  const [selectedLayout, setSelectedLayout] = React.useState<SectionLayout>("2-2");
+  const { updateColumnSettings, getColumnSettings, setElements } =
+    useBuilderStore();
+
+  const [selectedLayout, setSelectedLayout] =
+    React.useState<SectionLayout>("2-2");
   const [selectedColumn, setSelectedColumn] = React.useState(0);
-  
+
   // Mock section element với layout
   React.useEffect(() => {
     const mockSection = {
@@ -23,7 +25,7 @@ export default function ColumnSettingsDemo() {
       },
       children: [],
     };
-    
+
     setElements([mockSection]);
   }, [selectedLayout, setElements]);
 
@@ -38,9 +40,12 @@ export default function ColumnSettingsDemo() {
 
   const getMaxColumns = () => {
     switch (selectedLayout) {
-      case "default": return 1;
-      case "1-1-1-1": return 4;
-      default: return 2;
+      case "default":
+        return 1;
+      case "1-1-1-1":
+        return 4;
+      default:
+        return 2;
     }
   };
 
@@ -51,7 +56,7 @@ export default function ColumnSettingsDemo() {
         <p className="text-sm text-gray-600 mt-1">
           Test component cho cài đặt cột
         </p>
-        
+
         {/* Layout Selector */}
         <div className="mt-3">
           <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -91,24 +96,30 @@ export default function ColumnSettingsDemo() {
           </select>
         </div>
       </div>
-      
+
       <ColumnSettings
         columnId={mockColumnId}
         columnIndex={selectedColumn}
         columnSettings={columnSettings}
         onChange={handleColumnUpdate}
       />
-      
+
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <h3 className="font-medium mb-2">Current Settings:</h3>
         <pre className="text-xs bg-white p-2 rounded border overflow-auto max-h-32">
           {JSON.stringify(columnSettings, null, 2)}
         </pre>
-        
+
         <div className="mt-3 text-xs text-gray-600">
-          <div><strong>Layout:</strong> {selectedLayout}</div>
-          <div><strong>Selected Column:</strong> {selectedColumn + 1}</div>
-          <div><strong>Total Columns:</strong> {getMaxColumns()}</div>
+          <div>
+            <strong>Layout:</strong> {selectedLayout}
+          </div>
+          <div>
+            <strong>Selected Column:</strong> {selectedColumn + 1}
+          </div>
+          <div>
+            <strong>Total Columns:</strong> {getMaxColumns()}
+          </div>
         </div>
       </div>
     </div>

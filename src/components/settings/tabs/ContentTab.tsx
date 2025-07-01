@@ -142,10 +142,9 @@ export default function ContentTab({
                           max="100"
                           step="1"
                           defaultValue="100"
-                          className="flex-1"
                           disabled
                         />
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center">
                           <input
                             type="number"
                             value="100"

@@ -5,6 +5,7 @@ import DesignTab from "./tabs/DesignTab";
 import EffectsTab from "./tabs/EffectsTab";
 import AdvancedTab from "./tabs/AdvancedTab";
 import { useBuilderStore } from "@/store/useBuilderStore";
+import { CanvasElement } from "@/src/types/element";
 
 interface ColumnSettingsProps {
   columnId: string;
@@ -25,14 +26,16 @@ export default function ColumnSettings({
   }>({});
 
   // Get store to find parent section info
-  const { elements, updateColumnSettings, getColumnSettings } =
-    useBuilderStore();
+  const { elements, updateColumnSettings } = useBuilderStore();
 
   // Extract sectionId từ columnId (format: "sectionId-columnIndex")
   const sectionId = columnId.split("-")[0];
 
   // Find parent section element to get layout info
-  const findElementInTree = (elements: any[], id: string): any => {
+  const findElementInTree = (
+    elements: CanvasElement[],
+    id: string
+  ): CanvasElement | null => {
     for (const el of elements) {
       if (el.id === id) return el;
       if (el.children) {
@@ -119,8 +122,6 @@ export default function ColumnSettings({
             columnIndex={columnIndex}
             columnSettings={columnSettings}
             onChange={handleChange}
-            expandedSections={expandedSections}
-            toggleSection={toggleSection}
             sectionLayout={sectionLayout}
           />
         );
@@ -195,15 +196,11 @@ function ColumnContentTab({
   columnIndex,
   columnSettings,
   onChange,
-  expandedSections,
-  toggleSection,
   sectionLayout,
 }: {
   columnIndex: number;
   columnSettings: Record<string, string>;
   onChange: (key: string, value: string) => void;
-  expandedSections: { [key: string]: boolean };
-  toggleSection: (key: string) => void;
   sectionLayout: string;
 }) {
   // Detect layout type based on sectionLayout
@@ -255,7 +252,7 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên máy tính
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center">
               <input
                 type="range"
                 min="50"
@@ -267,13 +264,13 @@ function ColumnContentTab({
                   onChange("desktopWidth", e.target.value);
                 }}
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   min="50"
                   max="100"
                   value={columnSettings.desktopWidth || "100"}
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded"
                   onChange={(e) => onChange("desktopWidth", e.target.value)}
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -285,7 +282,7 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên điện thoại
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center">
               <input
                 type="range"
                 min="100"
@@ -294,11 +291,11 @@ function ColumnContentTab({
                 className="flex-1"
                 disabled
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   value="100"
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
                   disabled
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -341,7 +338,7 @@ function ColumnContentTab({
               Chiều rộng cột trên máy tính
             </label>
             <div className="flex items-center">
-              <span className="text-xs text-gray-500 w-16">
+              <span className="text-xs text-gray-500 w-14">
                 {columnIndex === 0 ? "Cột trái:" : "Cột phải:"}
               </span>
               <input
@@ -364,14 +361,14 @@ function ColumnContentTab({
                   }
                 }}
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   min="10"
                   max="90"
                   step="0.1"
                   value={columnSettings.desktopWidth || "50"}
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded"
                   onChange={(e) => {
                     const newValue = parseFloat(e.target.value);
                     if (newValue >= 10 && newValue <= 90) {
@@ -395,8 +392,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên điện thoại
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">Toàn bộ:</span>
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">Toàn bộ:</span>
               <input
                 type="range"
                 min="100"
@@ -405,11 +402,11 @@ function ColumnContentTab({
                 className="flex-1"
                 disabled
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   value="100"
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
                   disabled
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -432,7 +429,7 @@ function ColumnContentTab({
                       : "border-gray-300 text-gray-600 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-center  ">
                     <div
                       className={`w-4 h-3 border flex ${
                         align === "top"
@@ -473,8 +470,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên máy tính
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">
                 Cột {columnIndex + 1}:
               </span>
               <input
@@ -497,14 +494,14 @@ function ColumnContentTab({
                   }
                 }}
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   min="10"
                   max="40"
                   step="0.1"
                   value={columnSettings.desktopWidth || "25"}
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded"
                   onChange={(e) => {
                     const newValue = parseFloat(e.target.value);
                     if (newValue >= 10 && newValue <= 40) {
@@ -529,8 +526,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên điện thoại
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">Toàn bộ:</span>
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">Toàn bộ:</span>
               <input
                 type="range"
                 min="100"
@@ -539,11 +536,11 @@ function ColumnContentTab({
                 className="flex-1"
                 disabled
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   value="100"
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
                   disabled
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -566,7 +563,7 @@ function ColumnContentTab({
                       : "border-gray-300 text-gray-600 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-center  ">
                     <div
                       className={`w-4 h-3 border flex ${
                         align === "top"
@@ -607,8 +604,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên máy tính
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">
                 {columnIndex === 0 ? "Cột lớn:" : "Cột nhỏ:"}
               </span>
               <input
@@ -623,7 +620,7 @@ function ColumnContentTab({
                 className="flex-1"
                 onChange={(e) => onChange("desktopWidth", e.target.value)}
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   min={columnIndex === 0 ? "60" : "20"}
@@ -632,7 +629,7 @@ function ColumnContentTab({
                     columnSettings.desktopWidth ||
                     (columnIndex === 0 ? "66.66" : "33.33")
                   }
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded"
                   onChange={(e) => onChange("desktopWidth", e.target.value)}
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -644,8 +641,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên điện thoại
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">Toàn bộ:</span>
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">Toàn bộ:</span>
               <input
                 type="range"
                 min="100"
@@ -654,11 +651,11 @@ function ColumnContentTab({
                 className="flex-1"
                 disabled
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center  ">
                 <input
                   type="number"
                   value="100"
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
                   disabled
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -681,7 +678,7 @@ function ColumnContentTab({
                       : "border-gray-300 text-gray-600 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-center  ">
                     <div
                       className={`w-4 h-3 border flex ${
                         align === "top"
@@ -722,8 +719,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên máy tính
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">
                 {columnIndex === 0 ? "Cột nhỏ:" : "Cột lớn:"}
               </span>
               <input
@@ -738,7 +735,7 @@ function ColumnContentTab({
                 className="flex-1"
                 onChange={(e) => onChange("desktopWidth", e.target.value)}
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center">
                 <input
                   type="number"
                   min={columnIndex === 0 ? "20" : "60"}
@@ -747,7 +744,7 @@ function ColumnContentTab({
                     columnSettings.desktopWidth ||
                     (columnIndex === 0 ? "33.33" : "66.66")
                   }
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded"
                   onChange={(e) => onChange("desktopWidth", e.target.value)}
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -759,8 +756,8 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên điện thoại
             </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-16">Toàn bộ:</span>
+            <div className="flex items-center">
+              <span className="text-xs text-gray-500 w-14">Toàn bộ:</span>
               <input
                 type="range"
                 min="100"
@@ -769,11 +766,11 @@ function ColumnContentTab({
                 className="flex-1"
                 disabled
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center">
                 <input
                   type="number"
                   value="100"
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
+                  className="w-14 px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100"
                   disabled
                 />
                 <span className="text-xs text-gray-500">%</span>
@@ -796,7 +793,7 @@ function ColumnContentTab({
                       : "border-gray-300 text-gray-600 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-1">
+                  <div className="flex flex-col items-center  ">
                     <div
                       className={`w-4 h-3 border flex ${
                         align === "top"

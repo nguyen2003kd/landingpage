@@ -3,11 +3,6 @@
 import { useState } from "react";
 import { ElementType, SectionLayout } from "@/src/types/element";
 import {
-  FileText,
-  MousePointer,
-  Image,
-  CreditCard,
-  Minus,
   SquareStack,
   Grid2X2,
   Grid3X3,

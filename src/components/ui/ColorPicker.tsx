@@ -69,7 +69,7 @@ export default function ColorPicker({
       try {
         const parsed = JSON.parse(savedRecentColors);
         setRecentColors(parsed);
-      } catch (e) {
+      } catch {
         console.warn("Failed to parse recent colors from localStorage");
       }
     }
@@ -137,7 +137,7 @@ export default function ColorPicker({
             />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-gray-900 mb-1">
-                {value ? "Màu đã chọn" : "Chọn màu"}
+                {value ? " " : "Chọn màu"}
               </div>
               <div className="text-xs font-mono text-gray-600 truncate">
                 {value || "#ffffff"}
@@ -171,21 +171,6 @@ export default function ColorPicker({
                 </svg>
               </button>
             )}
-            <svg
-              className={`w-5 h-5 text-gray-400 transition-transform ${
-                isOpen ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
           </div>
         </div>
       </div>

@@ -405,7 +405,6 @@ export default function ElementRenderer({
 
       const getGridStyle = () => {
         const layout = element.props.layout || "default";
-        const columnRatio = element.props.columnRatio;
 
         if (layout === "default") return {};
 
