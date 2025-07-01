@@ -1,0 +1,48 @@
+/* Custom styles for ColumnSettings responsive behavior */
+
+/* Mobile responsive overrides */
+@media (max-width: 768px) {
+  .column-settings-responsive {
+    width: 100% !important;
+    flex-basis: 100% !important;
+  }
+  
+  .grid-columns-responsive {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .grid-columns-responsive > div {
+    width: 100% !important;
+  }
+}
+
+/* Column alignment utilities */
+.column-align-top {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.column-align-center {
+  align-items: center;
+  justify-content: center;
+}
+
+.column-align-bottom {
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* Column height utilities */
+.column-height-auto {
+  height: auto;
+}
+
+.column-height-fit {
+  height: fit-content;
+  min-height: fit-content;
+}
+
+.column-height-full {
+  height: 100%;
+  min-height: 100vh;
+}

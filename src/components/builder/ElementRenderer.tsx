@@ -147,6 +147,52 @@ export default function ElementRenderer({
     if (settings.paddingRight)
       style.paddingRight = `${settings.paddingRight}px`;
 
+    // Column specific settings from ColumnSettings
+    // Desktop width - commented out for grid layouts, will be handled by grid template columns
+    // if (settings.desktopWidth) {
+    //   style.width = `${settings.desktopWidth}%`;
+    //   style.flexGrow = 0;
+    //   style.flexShrink = 0;
+    //   style.flexBasis = `${settings.desktopWidth}%`;
+    // }
+
+    // Column height
+    if (settings.columnHeight) {
+      switch (settings.columnHeight) {
+        case "auto":
+          style.height = "auto";
+          break;
+        case "fit-content":
+          style.height = "fit-content";
+          style.minHeight = "fit-content";
+          break;
+        case "full-height":
+          style.height = "100%";
+          style.minHeight = "100vh";
+          break;
+      }
+    }
+
+    // Vertical alignment
+    if (settings.verticalAlign) {
+      switch (settings.verticalAlign) {
+        case "top":
+          style.alignItems = "flex-start";
+          style.justifyContent = "flex-start";
+          break;
+        case "center":
+          style.alignItems = "center";
+          style.justifyContent = "center";
+          break;
+        case "bottom":
+          style.alignItems = "flex-end";
+          style.justifyContent = "flex-end";
+          break;
+      }
+      style.display = "flex";
+      style.flexDirection = "column";
+    }
+
     return style;
   };
 
@@ -335,13 +381,15 @@ export default function ElementRenderer({
       const layout = element.props.layout || "default";
 
       const getLayoutClasses = (layout: string) => {
+        const responsiveClass = "grid-columns-responsive";
+
         switch (layout) {
           case "2-2":
           case "3-1":
           case "1-3":
-            return "grid gap-px";
+            return `grid gap-px ${responsiveClass}`;
           case "1-1-1-1":
-            return "grid grid-cols-4 gap-px";
+            return `grid grid-cols-4 gap-px ${responsiveClass}`;
           default:
             return "flex flex-col gap-4";
         }
@@ -362,30 +410,75 @@ export default function ElementRenderer({
         if (layout === "default") return {};
 
         if (layout === "1-1-1-1") {
+          // For 4 column layout - auto balance to 100%
+          const col0Settings = getColumnSettings(element.id, 0);
+          const col1Settings = getColumnSettings(element.id, 1);
+          const col2Settings = getColumnSettings(element.id, 2);
+          const col3Settings = getColumnSettings(element.id, 3);
+
+          let col0Width = parseFloat(col0Settings.desktopWidth) || 25;
+          let col1Width = parseFloat(col1Settings.desktopWidth) || 25;
+          let col2Width = parseFloat(col2Settings.desktopWidth) || 25;
+          let col3Width = parseFloat(col3Settings.desktopWidth) || 25;
+
+          // Auto-balance để tổng = 100%
+          const total = col0Width + col1Width + col2Width + col3Width;
+          if (total !== 100) {
+            const factor = 100 / total;
+            col0Width = Math.round(col0Width * factor * 100) / 100;
+            col1Width = Math.round(col1Width * factor * 100) / 100;
+            col2Width = Math.round(col2Width * factor * 100) / 100;
+            col3Width =
+              Math.round((100 - col0Width - col1Width - col2Width) * 100) / 100; // Đảm bảo tổng chính xác
+          }
+
           return {
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: `${col0Width}% ${col1Width}% ${col2Width}% ${col3Width}%`,
           };
         }
 
-        // Xử lý 2 cột với tỷ lệ tùy chỉnh
-        if (columnRatio && typeof columnRatio === "string") {
-          const [left, right] = columnRatio.split(":").map((v) => parseInt(v));
-          return {
-            gridTemplateColumns: `${left}% ${right}%`,
-          };
+        // For 2 column layouts - auto balance to 100%
+        const col0Settings = getColumnSettings(element.id, 0);
+        const col1Settings = getColumnSettings(element.id, 1);
+
+        let col0Width = parseFloat(col0Settings.desktopWidth);
+        let col1Width = parseFloat(col1Settings.desktopWidth);
+
+        // Set defaults based on layout type
+        if (!col0Width && !col1Width) {
+          switch (layout) {
+            case "3-1":
+              col0Width = 75;
+              col1Width = 25;
+              break;
+            case "1-3":
+              col0Width = 25;
+              col1Width = 75;
+              break;
+            default: // 2-2
+              col0Width = 50;
+              col1Width = 50;
+              break;
+          }
+        } else {
+          // Auto-balance để tổng = 100%
+          if (col0Width && !col1Width) {
+            col1Width = Math.max(0, 100 - col0Width);
+          } else if (!col0Width && col1Width) {
+            col0Width = Math.max(0, 100 - col1Width);
+          } else if (col0Width && col1Width) {
+            const total = col0Width + col1Width;
+            if (total !== 100) {
+              const factor = 100 / total;
+              col0Width = Math.round(col0Width * factor * 100) / 100;
+              col1Width = Math.round((100 - col0Width) * 100) / 100;
+            }
+          }
         }
 
-        // Fallback mặc định
-        switch (layout) {
-          case "2-2":
-            return { gridTemplateColumns: "1fr 1fr" };
-          case "3-1":
-            return { gridTemplateColumns: "3fr 1fr" };
-          case "1-3":
-            return { gridTemplateColumns: "1fr 3fr" };
-          default:
-            return {};
-        }
+        return {
+          gridTemplateColumns: `${col0Width}% ${col1Width}%`,
+        };
       };
 
       const renderSectionContent = () => {
@@ -403,13 +496,29 @@ export default function ElementRenderer({
                 return columnIndex === index;
               }) || [];
 
+            const columnSettings = getColumnSettings(element.id, index);
+            const alignmentClass = columnSettings.verticalAlign
+              ? `column-align-${columnSettings.verticalAlign}`
+              : "";
+            const heightClass = columnSettings.columnHeight
+              ? `column-height-${
+                  columnSettings.columnHeight === "fit-content"
+                    ? "fit"
+                    : columnSettings.columnHeight === "full-height"
+                    ? "full"
+                    : "auto"
+                }`
+              : "";
+
             return (
               <div
                 key={index}
                 data-column
-                className={`relative group flex flex-col ${getColumnClasses(
+                className={`relative group flex flex-col column-settings-responsive ${getColumnClasses(
                   layout
-                )} ${index > 0 ? "border-l border-gray-200" : ""}`}
+                )} ${alignmentClass} ${heightClass} ${
+                  index > 0 ? "border-l border-gray-200" : ""
+                }`}
                 style={getColumnStyle(element.id, index)}
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                   e.stopPropagation();
@@ -441,22 +550,6 @@ export default function ElementRenderer({
                         "hover:bg-gray-50/30"
                   }`}
                 >
-                  {/* Selected column indicator */}
-                  {/* {selectedColumnId === `${element.id}-${index}` && (
-                    <div className="absolute top-2 right-2 z-30">
-                      <div className="flex items-center gap-1 bg-orange-600 text-white text-xs px-2 py-1 rounded">
-                        <svg
-                          className="w-3 h-3"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span>Cột {index + 1}</span>
-                      </div>
-                    </div>
-                  )} */}
-
                   <SortableContext
                     items={columnChildren.map((c) => c.id)}
                     strategy={verticalListSortingStrategy}

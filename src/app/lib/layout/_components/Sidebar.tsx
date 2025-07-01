@@ -55,15 +55,6 @@ const COMPONENTS: {
     icon: <Columns2 className="w-4 h-4" />,
     layout: "1-3",
   },
-  { type: "text", label: "Text", icon: <FileText className="w-4 h-4" /> },
-  {
-    type: "button",
-    label: "Button",
-    icon: <MousePointer className="w-4 h-4" />,
-  },
-  { type: "image", label: "Image", icon: <Image className="w-4 h-4" /> },
-  { type: "card", label: "Card", icon: <CreditCard className="w-4 h-4" /> },
-  { type: "divider", label: "Divider", icon: <Minus className="w-4 h-4" /> },
 ];
 
 export default function Sidebar() {

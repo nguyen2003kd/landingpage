@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../components/settings/column-settings.css";
 
 :root {
   --background: #ffffff;
