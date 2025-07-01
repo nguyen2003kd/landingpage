@@ -340,7 +340,7 @@ function ColumnContentTab({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chiều rộng cột trên máy tính
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center">
               <span className="text-xs text-gray-500 w-16">
                 {columnIndex === 0 ? "Cột trái:" : "Cột phải:"}
               </span>
@@ -350,7 +350,7 @@ function ColumnContentTab({
                 max="90"
                 step="1"
                 value={columnSettings.desktopWidth || "50"}
-                className="flex-1"
+                className="flex-0"
                 onChange={(e) => {
                   const newValue = parseFloat(e.target.value);
                   if (newValue >= 10 && newValue <= 90) {

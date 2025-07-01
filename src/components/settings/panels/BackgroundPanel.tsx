@@ -2,6 +2,7 @@
 
 import React from "react";
 import { CanvasElement } from "@/types/element";
+import ColorPicker from "@/components/ui/ColorPicker";
 
 interface BackgroundPanelProps {
   element: CanvasElement;
@@ -44,30 +45,11 @@ export default function BackgroundPanel({
         {expandedSections.backgroundColor && (
           <div className="p-3 border-t border-gray-200 bg-gray-50">
             <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Màu nền
-                </label>
-                <div className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-white">
-                  <input
-                    type="color"
-                    className="w-1/2 h-10 border border-gray-300 rounded cursor-pointer"
-                    value={element.props.backgroundColor || "#ffffff"}
-                    onChange={(e) =>
-                      onChange("backgroundColor", e.target.value)
-                    }
-                  />
-                  <input
-                    type="text"
-                    placeholder="Nhập mã màu (vd: #ff0000)"
-                    value={element.props.backgroundColor || ""}
-                    className="w-1/2 px-3 py-2 text-sm text-gray-700 bg-transparent border border-gray-300 rounded outline-none focus:border-blue-400"
-                    onChange={(e) =>
-                      onChange("backgroundColor", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
+              <ColorPicker
+                label="Màu nền"
+                value={element.props.backgroundColor || "#ffffff"}
+                onChange={(color) => onChange("backgroundColor", color)}
+              />
             </div>
           </div>
         )}
