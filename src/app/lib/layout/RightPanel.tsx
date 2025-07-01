@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { useBuilderStore } from "@/store/useBuilderStore";
 import { CanvasElement } from "@/types/element";
-import SectionSettings from "@/components/builder/SectionSettings";
+import SectionSettings from "@/components/settings/SectionSettings";
+import ColumnSettings from "@/components/settings/ColumnSettings";
 
 // Helper function to find an element in a tree structure
 const findElementInTree = (
@@ -36,13 +37,30 @@ interface RightPanelProps {
 }
 
 const RightPanel = ({ setSelectpanel }: RightPanelProps) => {
-  const { elements, selectedId, updateElement, removeElement, selectElement } =
-    useBuilderStore();
+  const {
+    elements,
+    selectedId,
+    selectedColumnId,
+    selectedColumnIndex,
+    updateElement,
+    removeElement,
+    selectElement,
+    updateColumnSettings,
+    getColumnSettings,
+  } = useBuilderStore();
   const selectedElement = findElementInTree(elements, selectedId);
 
   const handleUpdate = (key: string, value: string) => {
     if (selectedId) {
       updateElement(selectedId, { [key]: value });
+    }
+  };
+
+  const handleColumnUpdate = (key: string, value: string) => {
+    if (selectedColumnId && selectedColumnIndex !== null) {
+      const sectionId = selectedColumnId.split("-")[0];
+      const columnIndex = selectedColumnIndex;
+      updateColumnSettings(sectionId, columnIndex, { [key]: value });
     }
   };
 
@@ -71,16 +89,27 @@ const RightPanel = ({ setSelectpanel }: RightPanelProps) => {
 
       {/* Content */}
       <div className="flex-1 p-4 overflow-y-auto">
-        {!selectedElement ? (
+        {!selectedElement && !selectedColumnId ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
               <MousePointer className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-gray-500 text-sm leading-relaxed">
-              Vui lòng chọn phần tử để cấu hình
+              Vui lòng chọn phần tử hoặc cột để cấu hình
             </p>
           </div>
-        ) : (
+        ) : selectedColumnId && selectedColumnIndex !== null ? (
+          // Hiển thị ColumnSettings khi chọn column
+          <ColumnSettings
+            columnId={selectedColumnId}
+            columnIndex={selectedColumnIndex}
+            columnSettings={getColumnSettings(
+              selectedColumnId.split("-")[0],
+              selectedColumnIndex
+            )}
+            onChange={handleColumnUpdate}
+          />
+        ) : selectedElement ? (
           <div className="space-y-6">
             <div className="text-sm text-gray-500">
               Loại:{" "}
@@ -114,11 +143,11 @@ const RightPanel = ({ setSelectpanel }: RightPanelProps) => {
               />
             )}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Footer with Delete Button */}
-      {selectedElement && (
+      {selectedElement && !selectedColumnId && (
         <div className="p-4 border-t border-gray-200">
           <button
             onClick={handleDelete}

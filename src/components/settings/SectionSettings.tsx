@@ -2,10 +2,10 @@
 
 import React from "react";
 import { CanvasElement } from "@/types/element";
-import ContentTab from "../settings/tabs/ContentTab";
-import DesignTab from "../settings/tabs/DesignTab";
-import EffectsTab from "../settings/tabs/EffectsTab";
-import AdvancedTab from "../settings/tabs/AdvancedTab";
+import ContentTab from "./tabs/ContentTab";
+import DesignTab from "./tabs/DesignTab";
+import EffectsTab from "./tabs/EffectsTab";
+import AdvancedTab from "./tabs/AdvancedTab";
 
 interface SectionSettingsProps {
   element: CanvasElement;
@@ -72,26 +72,36 @@ export default function SectionSettings({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === tab.id
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-800">Cài đặt Section</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            Tùy chỉnh layout và giao diện cho section
+          </p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-gray-200">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.id
+                  ? "border-blue-500 text-blue-600 bg-blue-50"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tab Content */}
-      <div>{renderTabContent()}</div>
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4">{renderTabContent()}</div>
     </div>
   );
 }

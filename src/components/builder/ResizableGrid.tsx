@@ -11,10 +11,8 @@ interface ResizableGridProps {
 }
 
 const ResizableGrid: React.FC<ResizableGridProps> = ({
-  sectionId,
   layout,
   children,
-  isSelected,
   columnRatio,
 }) => {
   // Lấy tỷ lệ cột từ props hoặc mặc định

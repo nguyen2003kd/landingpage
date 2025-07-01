@@ -43,14 +43,13 @@ export default function ElementRenderer({
 }: {
   element: CanvasElement;
 }) {
-  const { setNodeRef } = useDroppable({
-    id: element.id,
-    data: {
-      isContainer: element.type === "section",
-    },
-  });
-
-  const { selectElement, selectedId, removeElement } = useBuilderStore();
+  const { selectElement, selectedId, removeElement, selectColumn, selectedColumnId } = useBuilderStore();
+  // const { setNodeRef } = useDroppable({
+  //   id: element.id,
+  //   data: {
+  //     isContainer: element.type === "section",
+  //   },
+  // });
 
   // Xử lý phím Delete
   React.useEffect(() => {
@@ -65,12 +64,13 @@ export default function ElementRenderer({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedId, removeElement]);
 
-  const handleDeleteElement = (elementId: string, e: React.MouseEvent) => {
+  const handleDeleteElement = (elementId: string, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     removeElement(elementId);
   };
 
   // Tạo style cho section từ props
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getSectionStyle = (props: any) => {
     const style: React.CSSProperties = {};
 
@@ -155,6 +155,7 @@ export default function ElementRenderer({
   };
 
   // Render video background nếu có
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderVideoBackground = (props: any) => {
     if (!props.backgroundVideo) return null;
 
@@ -213,7 +214,7 @@ export default function ElementRenderer({
             ? "border-blue-500 bg-blue-50"
             : "border-transparent hover:border-gray-300"
         }`}
-        onClick={(e) => {
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
           e.stopPropagation();
           selectElement(element.id);
         }}
@@ -265,7 +266,7 @@ export default function ElementRenderer({
         }
       };
 
-      const getColumnClasses = (layout: string, index: number) => {
+      const getColumnClasses = (layout: string) => {
         // Chỉ áp dụng cho layout 4 cột
         if (layout === "1-1-1-1") {
           return "";
@@ -325,19 +326,39 @@ export default function ElementRenderer({
               <div
                 key={index}
                 className={`relative group flex flex-col gap-2 ${getColumnClasses(
-                  layout,
-                  index
+                  layout
                 )}`}
+                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                  e.stopPropagation();
+                  selectColumn(element.id, index);
+                }}
               >
                 {/* Column Content - Droppable Zone */}
                 <DropZone
                   id={`${element.id}-column-${index}`}
-                  className={`flex-1 border-2 border-dashed rounded-lg p-3 min-h-[120px] transition-all duration-200 bg-transition ${
-                    columnChildren.length > 0
-                      ? "border-green-300 bg-gradient-to-br from-green-50/50 to-emerald-50/30 hover:from-green-50 hover:to-emerald-50"
-                      : "border-blue-200 bg-gradient-to-br from-blue-50/50 to-indigo-50/30 hover:from-blue-50 hover:to-indigo-50"
+                  className={`flex-1 rounded-lg p-3 min-h-[120px] transition-all duration-200 ${
+                    // Selected column - border cam solid
+                    selectedColumnId === `${element.id}-${index}`
+                      ? "bg-orange-50 shadow-lg border-2 border-solid border-orange-300 rounded-lg"
+                      : columnChildren.length === 0
+                      // Cột trống - border-dashed xám nhạt
+                      ? "border-2 border-dashed border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 rounded-lg"
+                      // Cột có nội dung - không border, chỉ hover nhẹ
+                      : "bg-transparent hover:bg-gray-50/30"
                   }`}
                 >
+                  {/* Selected column indicator */}
+                  {selectedColumnId === `${element.id}-${index}` && (
+                    <div className="absolute top-2 right-2 z-30">
+                      <div className="flex items-center gap-1 bg-orange-600 text-white text-xs px-2 py-1 rounded">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Cột {index + 1}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <SortableContext
                     items={columnChildren.map((c) => c.id)}
                     strategy={verticalListSortingStrategy}
@@ -416,11 +437,11 @@ export default function ElementRenderer({
           );
         }
 
-        // Empty state chỉ cho layout default
+        // Empty state - hiển thị placeholder đơn giản
         return (
-          <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-xl bg-gradient-to-br from-white to-gray-50">
+          <div className="flex items-center justify-center h-32 rounded-xl bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
                 <svg
                   className="w-8 h-8 text-gray-400"
                   fill="none"
@@ -464,23 +485,15 @@ export default function ElementRenderer({
         >
           <DropZone
             id={element.id}
-            className={`relative group p-4 border-2 border-dashed min-h-[120px] transition-all duration-300 shadow-sm hover:shadow-md cursor-move bg-transition ${
-              // Chỉ áp dụng màu nền mặc định nếu không có style custom
-              !element.props.backgroundColor ? "bg-gradient-to-br" : ""
-            } ${
+            className={`relative group p-4 min-h-[120px] transition-all duration-300 ${
+              // Chỉ hiển thị highlight nhẹ khi section được selected
               selectedId === element.id
-                ? "border-blue-500 shadow-lg"
-                : "border-gray-300 hover:border-gray-400"
+                ? "bg-blue-50/50 shadow-lg rounded-xl ring-2 ring-blue-200 ring-opacity-50"
+                : "bg-transparent hover:bg-gray-50/30 rounded-xl"
             } ${
-              // Chỉ áp dụng background gradient mặc định nếu không có background custom
-              !element.props.backgroundColor && !element.props.backgroundImage
-                ? selectedId === element.id
-                  ? "from-blue-50 to-blue-100/50"
-                  : "from-gray-50 to-gray-100/50 hover:from-gray-100 hover:to-gray-50"
-                : ""
-            } ${
-              // Chỉ áp dụng border radius mặc định nếu không có custom
-              !element.props.borderRadius ? "rounded-xl" : ""
+              // Chỉ áp dụng màu nền mặc định khi được selected
+              !element.props.backgroundColor && selectedId === element.id
+                ? "bg-gradient-to-br from-blue-50 to-blue-100/50" : ""
             }`}
           >
             {/* Video Background */}

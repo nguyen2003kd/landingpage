@@ -130,6 +130,9 @@ const findElementIndex = (elements: CanvasElement[], elementId: string, containe
 interface BuilderState {
   elements: CanvasElement[];
   selectedId: string | null;
+  selectedColumnId: string | null; // section-id + column-index
+  selectedColumnIndex: number | null;
+  columnSettings: Record<string, Record<string, string>>; // sectionId-columnIndex -> settings
   addElement: (newElement: Omit<CanvasElement, 'id' | 'children'>, parentId: string | null, index: number) => void;
   addElementToColumn: (elementData: Omit<CanvasElement, 'id' | 'children'>, parentId: string, columnIndex: number) => void;
   moveElement: (from: number, to: number) => void;
@@ -138,6 +141,9 @@ interface BuilderState {
   removeElement: (id: string) => void;
   updateElement: (id: string, props: Partial<CanvasElement["props"]>) => void;
   selectElement: (id: string | null) => void;
+  selectColumn: (sectionId: string, columnIndex: number) => void;
+  updateColumnSettings: (sectionId: string, columnIndex: number, settings: Record<string, string>) => void;
+  getColumnSettings: (sectionId: string, columnIndex: number) => Record<string, string>;
   setElements: (els: CanvasElement[]) => void;
   exportLayout: () => string;
   importLayout: (json: string) => void;
@@ -146,6 +152,9 @@ interface BuilderState {
 export const useBuilderStore = create<BuilderState>((set, get) => ({
   elements: [],
   selectedId: null,
+  selectedColumnId: null,
+  selectedColumnIndex: null,
+  columnSettings: {},
   
   addElement: (elementData, parentId, index) =>
     set((state) => {
@@ -234,7 +243,29 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       return { elements: updater(state.elements) };
     }),
     
-  selectElement: (id) => set({ selectedId: id }),
+  selectElement: (id) => set({ selectedId: id, selectedColumnId: null, selectedColumnIndex: null }),
+  
+  selectColumn: (sectionId, columnIndex) => set({
+    selectedColumnId: `${sectionId}-${columnIndex}`,
+    selectedColumnIndex: columnIndex,
+    selectedId: null,
+  }),
+  
+  updateColumnSettings: (sectionId, columnIndex, settings) =>
+    set((state) => ({
+      columnSettings: {
+        ...state.columnSettings,
+        [`${sectionId}-${columnIndex}`]: {
+          ...state.columnSettings[`${sectionId}-${columnIndex}`],
+          ...settings,
+        },
+      },
+    })),
+  
+  getColumnSettings: (sectionId, columnIndex) => {
+    const state = get();
+    return state.columnSettings[`${sectionId}-${columnIndex}`] || {};
+  },
   
   setElements: (els) => set({ elements: els }),
   

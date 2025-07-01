@@ -1,4 +1,4 @@
-export type ElementType = "text" | "button" | "image" | "card" | "divider" | "section";
+export type ElementType = "text" | "button" | "image" | "card" | "divider" | "section" | "column";
 
 export type SectionLayout = "default" | "2-2" | "1-1-1-1" | "3-1" | "1-3";
 
@@ -23,6 +23,7 @@ export interface ElementProps {
   backgroundAnimation?: string; // hiệu ứng di chuyển: none, horizontal, vertical, parallax
   // Border and styling
   borderRadius?: string;
+  borderWidth?: string;
   borderStyle?: string;
   borderColor?: string;
   shadow?: string;
