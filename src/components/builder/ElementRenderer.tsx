@@ -9,6 +9,7 @@ import {
 import SortableItem from "@/components/builder/SortableItem";
 import { useDroppable } from "@dnd-kit/core";
 import { useBuilderStore } from "@/store/useBuilderStore";
+import { useColumnResize } from "@/hook/useColumnResize";
 
 function DropZone({
   id,
@@ -43,13 +44,30 @@ export default function ElementRenderer({
 }: {
   element: CanvasElement;
 }) {
-  const { selectElement, selectedId, removeElement, selectColumn, selectedColumnId } = useBuilderStore();
-  // const { setNodeRef } = useDroppable({
-  //   id: element.id,
-  //   data: {
-  //     isContainer: element.type === "section",
-  //   },
-  // });
+  const {
+    selectElement,
+    selectedId,
+    removeElement,
+    selectColumn,
+    selectedColumnId,
+    updateElement,
+    getColumnSettings,
+  } = useBuilderStore();
+
+  // Column resize hook
+  const { handleMouseDown: handleResizeMouseDown } = useColumnResize({
+    onResize: (columnIndex, newRatio) => {
+      if (element.type === "section") {
+        updateElement(element.id, { columnRatio: newRatio });
+      }
+    },
+    layout:
+      element.type === "section"
+        ? element.props.layout || "default"
+        : "default",
+    currentRatio:
+      element.type === "section" ? element.props.columnRatio : undefined,
+  });
 
   // Xử lý phím Delete
   React.useEffect(() => {
@@ -64,9 +82,72 @@ export default function ElementRenderer({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedId, removeElement]);
 
-  const handleDeleteElement = (elementId: string, e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteElement = (
+    elementId: string,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.stopPropagation();
     removeElement(elementId);
+  };
+
+  // Apply styles cho column dựa vao columnSettings
+  const getColumnStyle = (
+    sectionId: string,
+    columnIndex: number
+  ): React.CSSProperties => {
+    const settings = getColumnSettings(sectionId, columnIndex);
+    const style: React.CSSProperties = {};
+
+    // Màu nền
+    if (settings.backgroundColor) {
+      style.backgroundColor = settings.backgroundColor;
+    }
+
+    // Ảnh nền
+    if (settings.backgroundImage) {
+      style.backgroundImage = `url(${settings.backgroundImage})`;
+      style.backgroundSize = "cover";
+      style.backgroundRepeat = "no-repeat";
+      style.backgroundPosition = settings.backgroundPosition || "center";
+    }
+
+    // Bo góc
+    if (settings.borderRadius) {
+      style.borderRadius = `${settings.borderRadius}px`;
+    }
+
+    // Viền
+    if (settings.borderStyle && settings.borderColor) {
+      style.border = `2px ${settings.borderStyle} ${settings.borderColor}`;
+    }
+
+    // Đổ bóng
+    if (settings.shadow === "true" || settings.shadowEnabled === "true") {
+      style.boxShadow =
+        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+    }
+
+    // Độ trong suốt
+    if (settings.opacity && settings.opacity !== "100") {
+      style.opacity = parseInt(settings.opacity) / 100;
+    }
+
+    // Margin
+    if (settings.marginTop) style.marginTop = `${settings.marginTop}px`;
+    if (settings.marginBottom)
+      style.marginBottom = `${settings.marginBottom}px`;
+    if (settings.marginLeft) style.marginLeft = `${settings.marginLeft}px`;
+    if (settings.marginRight) style.marginRight = `${settings.marginRight}px`;
+
+    // Padding
+    if (settings.paddingTop) style.paddingTop = `${settings.paddingTop}px`;
+    if (settings.paddingBottom)
+      style.paddingBottom = `${settings.paddingBottom}px`;
+    if (settings.paddingLeft) style.paddingLeft = `${settings.paddingLeft}px`;
+    if (settings.paddingRight)
+      style.paddingRight = `${settings.paddingRight}px`;
+
+    return style;
   };
 
   // Tạo style cho section từ props
@@ -258,9 +339,9 @@ export default function ElementRenderer({
           case "2-2":
           case "3-1":
           case "1-3":
-            return "grid gap-4";
+            return "grid gap-px";
           case "1-1-1-1":
-            return "grid grid-cols-4 gap-4";
+            return "grid grid-cols-4 gap-px";
           default:
             return "flex flex-col gap-4";
         }
@@ -325,39 +406,56 @@ export default function ElementRenderer({
             return (
               <div
                 key={index}
-                className={`relative group flex flex-col gap-2 ${getColumnClasses(
+                data-column
+                className={`relative group flex flex-col ${getColumnClasses(
                   layout
-                )}`}
+                )} ${index > 0 ? "border-l border-gray-200" : ""}`}
+                style={getColumnStyle(element.id, index)}
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                   e.stopPropagation();
                   selectColumn(element.id, index);
                 }}
               >
+                {/* Resize Handle - chỉ hiển thị cho cột từ thứ 2 trở đi */}
+                {index > 0 && (
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1 bg-transparent hover:bg-blue-400 cursor-col-resize z-20 group-hover:bg-blue-300 transition-colors"
+                    onMouseDown={(e) => {
+                      handleResizeMouseDown(e, index);
+                    }}
+                    title={`Kéo để thay đổi kích thước cột ${index + 1}`}
+                  />
+                )}
+
                 {/* Column Content - Droppable Zone */}
                 <DropZone
                   id={`${element.id}-column-${index}`}
                   className={`flex-1 rounded-lg p-3 min-h-[120px] transition-all duration-200 ${
-                    // Selected column - border cam solid
+                    // Selected column - border cam solid, không có background mặc định
                     selectedColumnId === `${element.id}-${index}`
-                      ? "bg-orange-50 shadow-lg border-2 border-solid border-orange-300 rounded-lg"
+                      ? "shadow-lg border-2 border-solid border-orange-300 rounded-lg"
                       : columnChildren.length === 0
-                      // Cột trống - border-dashed xám nhạt
-                      ? "border-2 border-dashed border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 rounded-lg"
-                      // Cột có nội dung - không border, chỉ hover nhẹ
-                      : "bg-transparent hover:bg-gray-50/30"
+                      ? // Cột trống - border-dashed xám nhạt
+                        "border-2 border-dashed border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 rounded-lg"
+                      : // Cột có nội dung - không border, chỉ hover nhẹ
+                        "hover:bg-gray-50/30"
                   }`}
                 >
                   {/* Selected column indicator */}
-                  {selectedColumnId === `${element.id}-${index}` && (
+                  {/* {selectedColumnId === `${element.id}-${index}` && (
                     <div className="absolute top-2 right-2 z-30">
                       <div className="flex items-center gap-1 bg-orange-600 text-white text-xs px-2 py-1 rounded">
-                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className="w-3 h-3"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>Cột {index + 1}</span>
                       </div>
                     </div>
-                  )}
+                  )} */}
 
                   <SortableContext
                     items={columnChildren.map((c) => c.id)}
@@ -437,9 +535,9 @@ export default function ElementRenderer({
           );
         }
 
-        // Empty state - hiển thị placeholder đơn giản
+        // Empty state - hiển thị placeholder với border-dashed
         return (
-          <div className="flex items-center justify-center h-32 rounded-xl bg-gray-50/50 hover:bg-gray-100/50 transition-colors">
+          <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:border-gray-300 hover:bg-gray-100/50 transition-colors">
             <div className="text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
                 <svg
@@ -493,7 +591,8 @@ export default function ElementRenderer({
             } ${
               // Chỉ áp dụng màu nền mặc định khi được selected
               !element.props.backgroundColor && selectedId === element.id
-                ? "bg-gradient-to-br from-blue-50 to-blue-100/50" : ""
+                ? "bg-gradient-to-br from-blue-50 to-blue-100/50"
+                : ""
             }`}
           >
             {/* Video Background */}
